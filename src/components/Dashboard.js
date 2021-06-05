@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import {Link, Redirect} from 'react-router-dom'
 import axios from 'axios'
+import itemsApiData from '../Providers/provider'
+// import itemApiData from '../Providers/provider'
 
 
 export default class Dashboard extends Component {
@@ -12,13 +14,19 @@ export default class Dashboard extends Component {
             id: this.props.location.state.id,
             type: this.props.location.state.type,
             logout: '',
-            item:'',
+            item: '',
+            itemsApiData: [],
+            customer: ''
             
         }
         this.logout = this.logout.bind(this)
+        this.submit = this.submit.bind(this)
+        // this.changeItem = this.changeItem.bind(this)
+        this.changeCustomer = this.changeCustomer.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
+        let itemsApiData
         this.setState({
             email: this.props.location.state.email,
             companyname: this.props.location.state.companyname,
@@ -32,8 +40,79 @@ export default class Dashboard extends Component {
         axios.post(url, post)
         .then((res)=>{
             console.log(res.data)
+            itemsApiData = res.data
+            this.setState({
+                email: this.props.location.state.email,
+                companyname: this.props.location.state.companyname,
+                id: this.props.location.state.id,
+                type: this.props.location.state.type,
+                itemsApiData: itemsApiData.items
+            })
         })
         .catch(err => console.log(err))
+    }
+
+    submit = (e) => {
+        e.preventDefault()
+        let saleTable = document.getElementById("saleTable")
+        let formData = new FormData(saleTable)
+        let body = {}
+        for (let key of formData.keys()) {
+            body[key] = formData.get(key)
+        }
+        fetch('/add_sale', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        .then((res) => {
+            return res.json()
+        })
+        .then((data) => {
+            console.log(data)
+            if (data.message == 'Success!') {
+                this.setState({message: data.message})
+                setTimeout(() => {
+                    this.setState({
+                        message: ''
+                    })
+                }, 5000)
+                
+            } else {
+                this.setState({message: data.message})
+                setTimeout(() => {
+                    this.setState({
+                        message: ''
+                    })
+                }, 5000)
+            }
+        })
+        .catch(() => {
+            console.log('Oops, an error occured!')
+        })
+
+        body.companyname = this.state.companyname
+        fetch(`/edit_inventory/${body.item}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        .then((res) => {
+            return res.json()
+        })
+        .then((data) => {
+            console.log(data)
+        })
+    }
+
+    changeCustomer = (e) => {
+        this.setState({[e.target.name]: e.target.value})
     }
 
     logout(){
@@ -90,44 +169,47 @@ export default class Dashboard extends Component {
                 <div className='container' style={{marginTop: '5%'}}>
                       <h2 style={{textAlign:'center'}}>Initialize Sale</h2><br/>
                       <div className='form-div'>
-                      <span style={{color:'red'}}></span>
-                          <form onSubmit={this.submit}>
+                      <span style={{color:'green'}}>{this.state.message}</span>
+                      <span style={{ color: 'red' }}>{this.state.error}</span>
+                          <form onSubmit={this.submit} id="saleTable">
                           Item:
                           <select required onChange = {this.changeItem} name="item" id="item" style={{width:'100%', borderRadius:'30px'}} className = 'form-control form-group'>
-                              <option value="">-- Choose Session --</option>
-                                <option value="30mins">30 Mins. session</option>
-                                <option value="1hour">1 Hour session</option>
-                                <option value="children 30mins">Children shoot from 6months - 5years, 30Mins.</option>
-                                <option value="children 1hour">Children shoot from 6months - 5years, 1Hour</option>
-                                <option value="group 30mins">Group photo with family or friends, 30Mins.</option>
-                                <option value="group 1hour">Group photo with family or friends, 1Hour</option>
-                                <option value="product 30mins">Product shoot, 30Mins.</option>
-                                <option value="product 1hour">Product shoot, 1Hour</option>
-                                <option value="home 30mins">Photo session (Home service), 30Mins.</option>
-                                <option value="home 1hour">Photo session (Home service), 1Hour</option>
-                                <option value="outdoor 1hour">Photo session (Outdoor), 1Hour</option>
-                                <option value="outdoor 30mins">Photo session (Outdoor), 30Mins.</option>
-                                <option value="artist">Artist photoshoot @ the studio, 1Hour</option>
+                                <option value="">-- Choose Session --</option>
+                                {this.state.itemsApiData.map((item) => (
+                                    <option value={item.itemName} key={ item._id }>{ item.itemName }</option>
+                                )) }
                           </select>
                            Customer:
                           <input required style={{width:'100%', borderRadius:'30px'}} type = 'text'
                           placeholder = 'Customer'
                           onChange = {this.changeCustomer}
-                          value = {this.state.customer}
+                          value={this.state.customer}
+                          name='customer'
                           className = 'form-control form-group'
                           />
                           Phone Number:
                           <input required style={{width:'100%', borderRadius:'30px'}} type = 'number'
                           placeholder = 'Phone Number'
                           onChange = {this.changePhone}
-                          value = {this.state.phone}
+                          value={this.state.phone}
+                          name='phone'
                           className = 'form-control form-group'
                           />
+                          Units:
+                          <input required style={{width:'100%', borderRadius:'30px'}} type = 'number'
+                          placeholder = 'Units'
+                          onChange = {this.changeUnit}
+                          value={this.state.units}
+                          name='units'
+                          className = 'form-control form-group'
+                          />
+                                
                           Discount:
                           <input style={{width:'100%', borderRadius:'30px'}} type = 'number'
                           placeholder = 'Discount'
                           onChange = {this.changeDiscount}
-                          value = {this.state.discount}
+                          value={this.state.discount}
+                          name='discount'
                           className = 'form-control form-group'
                           />
                           <input 
@@ -144,6 +226,7 @@ export default class Dashboard extends Component {
                 {
                    this.state.logout === true ? <Redirect to='/'/> : null
                 }
+                  
                 </div>
             )
         }else if(this.state.type === 'Buyer'){

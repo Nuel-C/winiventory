@@ -15,6 +15,31 @@ export default class Sales extends Component {
         this.logout = this.logout.bind(this)
     }
 
+    componentDidMount() {
+        fetch('/list_sales')
+        .then((res) => {
+            return res.json()
+        })
+        .then((data) => {
+            let salesTable = document.getElementById('salesTable')
+            let content = ''
+            for (let i = 0; i < data.sales.length; i++) {
+                content = `<tr>
+                                <td>${ data.sales[i].item }</td>
+                                <td>${ data.sales[i].customer }</td>
+                                <td>${ data.sales[i].phone }</td>
+                                <td>${ data.sales[i].units }</td>
+                                <td>${ data.sales[i].discount }</td>
+                                <td>${ new Date(data.sales[i].date).toISOString().substr(0, 10) }</td>
+                            </tr>`
+                salesTable.innerHTML += content
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
     logout(){
         var url = '/logout'
         axios.get(url)
@@ -64,7 +89,23 @@ export default class Sales extends Component {
                     </ul>
 
                 </div>
-            </nav>
+             </nav>
+                <div className="table-responsive container mt-5">
+                    <table className="table table-hover" style={{ whiteSpace: 'nowrap' }}>
+                        <thead className="thead thead-dark">
+                            <tr>
+                                <th>Item</th>
+                                <th>Customer</th>
+                                <th>Phone Number</th>
+                                <th>Units</th>
+                                <th>Discount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTable">
+                        </tbody>
+                    </table>
+                </div>
             {
                this.state.logout === true ? <Redirect to='/'/> : null
             }
