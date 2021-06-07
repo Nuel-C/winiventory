@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import {Link, Redirect} from 'react-router-dom'
 import axios from 'axios'
-import itemsApiData from '../Providers/provider'
-// import itemApiData from '../Providers/provider'
 
 
 export default class Dashboard extends Component {
@@ -21,7 +19,6 @@ export default class Dashboard extends Component {
         }
         this.logout = this.logout.bind(this)
         this.submit = this.submit.bind(this)
-        // this.changeItem = this.changeItem.bind(this)
         this.changeCustomer = this.changeCustomer.bind(this)
     }
 
@@ -60,7 +57,7 @@ export default class Dashboard extends Component {
         for (let key of formData.keys()) {
             body[key] = formData.get(key)
         }
-        fetch('/add_sale', {
+        fetch(`/add_sale/${ this.state.companyname }`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -234,7 +231,7 @@ export default class Dashboard extends Component {
                 <Redirect to={{
                     pathname: "/home",
                     state: {
-                      email: this.state.email,
+                      email: this.state.email ? this.state.email : null,
                       companyname: this.state.companyname,
                       id: this.state.id,
                       type: this.state.type

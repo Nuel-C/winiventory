@@ -16,24 +16,29 @@ export default class Sales extends Component {
     }
 
     componentDidMount() {
-        fetch('/list_sales')
+        fetch(`/list_sales/${this.state.companyname}`)
         .then((res) => {
             return res.json()
         })
         .then((data) => {
             let salesTable = document.getElementById('salesTable')
             let content = ''
-            for (let i = 0; i < data.sales.length; i++) {
-                content = `<tr>
-                                <td>${ data.sales[i].item }</td>
-                                <td>${ data.sales[i].customer }</td>
-                                <td>${ data.sales[i].phone }</td>
-                                <td>${ data.sales[i].units }</td>
-                                <td>${ data.sales[i].discount }</td>
-                                <td>${ new Date(data.sales[i].date).toISOString().substr(0, 10) }</td>
+            let reverse = []
+            data.sales.map((sale) => {
+                 reverse.push(sale)
+            })
+            reverse.reverse()
+            reverse.map((sale) => {
+                 content = `<tr>
+                                <td>${ sale.item }</td>
+                                <td>${ sale.customer }</td>
+                                <td>${ sale.phone }</td>
+                                <td>${ sale.units }</td>
+                                <td>${ sale.discount }</td>
+                                <td>${ new Date(sale.date).toISOString().substr(0, 10) }</td>
                             </tr>`
                 salesTable.innerHTML += content
-            }
+            })
         })
         .catch((err) => {
             console.log(err)

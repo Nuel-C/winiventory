@@ -16,6 +16,16 @@
     border-bottom: 1px solid black;
     width: 10%;
   }
+
+  .view:hover{
+    background-color: #ffffff;
+    border: none;
+  }
+
+  .purchase:hover{
+    background-color: #ffffff;
+    border: 0px solid #ffffff;
+  }
   
 
 @media only screen and (max-width: 768px) {
@@ -25,6 +35,16 @@
       }
       .hide{
           display: none;
+      }
+      .view{
+        display: none;
+      }
+      .viewBtn{
+        display: block;
+      }
+      .purchase:hover{
+        background-color: #ffffff;
+        border: 0px solid #ffffff;
       }
   }
       
@@ -37,6 +57,17 @@
       .btn:hover{
           background-color: green;
           border: 1px solid green;
+      }
+      .view:hover{
+        background-color: #ffffff;
+        border: 0px solid #ffffff;
+      }
+      .viewBtn{
+        display: none;
+      }
+      .purchase:hover{
+        background-color: #ffffff;
+        border: 0px solid #ffffff;
       }
   }
       

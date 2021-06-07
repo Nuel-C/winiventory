@@ -126,7 +126,7 @@ export default class Inventory extends Component {
             itemName: this.state.name,
             units: this.state.units,
             description: this.state.description,
-            unitprice: this.state.unitprice,
+            unitPrice: this.state.unitprice,
             id: this.state.id
 
         }

@@ -9,6 +9,7 @@ import Dashboard from './components/Dashboard'
 import Inventory from './components/Inventory'
 import Sales from './components/Sales'
 import Home from './components/Home'
+import Order from './components/Order'
 
 export default class App extends Component {
   constructor(){
@@ -154,6 +155,7 @@ export default class App extends Component {
         <Route path = '/inventory' component = {Inventory} />
         <Route path = '/sales' component = {Sales} />
         <Route path = '/home' component = {Home} />
+        <Route path = '/order' component = {Order} />
       </Router>
     )
   }
