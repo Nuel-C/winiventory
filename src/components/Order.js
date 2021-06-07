@@ -2,13 +2,15 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 
 export class Order extends Component {
+    //company name here refers to the buyer
     state = {
         email: this.props.location.state.email,
         companyname: this.props.location.state.companyname,
         seller: this.props.location.state.seller,
         id: this.props.location.state.id,
         items: [],
-        type: this.props.location.state.type
+        type: this.props.location.state.type,
+        currentItem: {}
     }
 
     componentDidMount() {
@@ -31,6 +33,74 @@ export class Order extends Component {
             })
         })
         .catch(err => console.log(err))
+    }
+
+    purchase = (e, item) => {
+        this.setState({
+            currentItem: item
+        })
+    }
+
+    submit = (e) => {
+
+        let purchaseForm = document.getElementById("purchaseForm")
+        let formData = new FormData(purchaseForm)
+        let body = this.state.currentItem
+        delete body._id
+        delete body.date
+        body['customerName'] = this.state.companyname
+        for (let key of formData.keys()) {
+            body[key] = formData.get(key)
+        }
+        fetch('/add_purchase', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        .then((res) => {
+            return res.json()
+        })
+        .then((data) => {
+            console.log(data)
+            if (data.message == 'Success!') {
+                this.setState({message: data.message})
+                setTimeout(() => {
+                    this.setState({
+                        message: ''
+                    })
+                }, 5000)
+                
+            } else {
+                this.setState({message: data.message})
+                setTimeout(() => {
+                    this.setState({
+                        message: ''
+                    })
+                }, 5000)
+            }
+        })
+        .catch(() => {
+            console.log('Oops, an error occured!')
+        })
+
+        // body.companyname = this.state.companyname
+        // fetch(`/edit_inventory/${body.item}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json, text/plain, */*',
+        //         'Content-type': 'application/json'
+        //     },
+        //     body: JSON.stringify(body)
+        // })
+        // .then((res) => {
+        //     return res.json()
+        // })
+        // .then((data) => {
+        //     console.log(data)
+        // })
     }
 
     render() {
@@ -56,6 +126,17 @@ export class Order extends Component {
                                     }
                                     }}><strong>Dashboard</strong>
                                 </Link>
+                            </li>
+                            <li className="nav-item">
+                               <Link className='nav-link' style={{color:'black'}} to={{
+                                    pathname: '/purchases',
+                                    state: {
+                                        companyname: this.state.companyname,
+                                        email: this.state.email,
+                                        id: this.state.id,
+                                        type: this.state.type
+                                    }
+                                }}><strong>Purchases</strong></Link>
                             </li>
 
                             <li className="nav-item">
@@ -106,16 +187,48 @@ export class Order extends Component {
                                                 </div>
                                             </div>
                                         </div>
-                                        <button className='btn btn-default mb-5 mx-5 purchase' style={{
+                                        <button className='btn btn-default mb-5 mx-5 purchase' data-toggle="modal" data-target="#purchaseModal" style={{
                                             borderRadius: 20,
                                             fontFamily: 'cursive',
-                                            boxShadow: '0px 5px 10px darkgrey',
-                                            float: 'right'
-                                        }}>Purchase</button>
+                                            boxShadow: '0px 5px 10px darkgrey'
+                                        }} onClick={ () =>this.purchase(this, item) }>
+                                            <i className='la la-shopping-cart'></i>
+                                            {' '}
+                                            Purchase
+                                        </button>
                                     </div>
                                 </div>
                             ))
                         }
+                    </div>
+                </div>
+
+                {/* Modal */}
+                <div class="modal fade" id="purchaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Purchase</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form className='mt-3' id='purchaseForm'>
+                                    <span style={{color:'green'}}>{this.state.message}</span>
+                                    <span style={{color:'red'}}>{this.state.error}</span>
+                                    <div className='form-group'>
+                                        <input type="number" name="units" id="units" placeholder='Number of units you wish to purchase...' className='form-control' style={{
+                                            borderRadius: 20
+                                        }}/>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-success" onClick={ this.submit }>Purchase</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
