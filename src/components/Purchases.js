@@ -35,6 +35,7 @@ export class Purchases extends Component {
                                 <td>${ purchase.unitPrice }</td>
                                 <td>${ purchase.units }</td>
                                 <td>${ new Date(purchase.date).toISOString().substr(0, 10) }</td>
+                                <td>${ purchase.status }</td>
                             </tr>`
                 purchasesTable.innerHTML += content
             })
@@ -98,6 +99,7 @@ export class Purchases extends Component {
                                 <th>Unit Price</th>
                                 <th>Units</th>
                                 <th>Date</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="purchasesTable">

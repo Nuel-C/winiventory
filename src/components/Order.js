@@ -42,13 +42,13 @@ export class Order extends Component {
     }
 
     submit = (e) => {
-
         let purchaseForm = document.getElementById("purchaseForm")
         let formData = new FormData(purchaseForm)
         let body = this.state.currentItem
         delete body._id
         delete body.date
         body['customerName'] = this.state.companyname
+        body['status'] = 'Not yet approved'
         for (let key of formData.keys()) {
             body[key] = formData.get(key)
         }
@@ -64,7 +64,6 @@ export class Order extends Component {
             return res.json()
         })
         .then((data) => {
-            console.log(data)
             if (data.message == 'Success!') {
                 this.setState({message: data.message})
                 setTimeout(() => {
@@ -85,22 +84,6 @@ export class Order extends Component {
         .catch(() => {
             console.log('Oops, an error occured!')
         })
-
-        // body.companyname = this.state.companyname
-        // fetch(`/edit_inventory/${body.item}`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json, text/plain, */*',
-        //         'Content-type': 'application/json'
-        //     },
-        //     body: JSON.stringify(body)
-        // })
-        // .then((res) => {
-        //     return res.json()
-        // })
-        // .then((data) => {
-        //     console.log(data)
-        // })
     }
 
     render() {
