@@ -247,7 +247,7 @@ export default class Dashboard extends Component {
             return (
                 <div>
                     <nav className="navbar navbar-expand-md navbar-light bg-light" style={{textAlign:'center'}}>
-                    <a className="navbar-brand" href='/'>Winnieventory</a>
+                    <a className="navbar-brand" href='/'>Winventory</a>
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -382,7 +382,7 @@ export default class Dashboard extends Component {
                                                 fontFamily: 'cursive',
                                                 boxShadow: '0px 5px 10px darkgrey'
                                             }} onClick={ () =>this.setCurrentItem(this, purchase) }>
-                                                <i className='la la-check'></i>
+                                                <i className='la la-check-circle'></i>
                                                 {' '}
                                                 Approve
                                             </button>
@@ -420,7 +420,10 @@ export default class Dashboard extends Component {
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-success" onClick={ this.approve }>Purchase</button>
+                                    <button type="button" class="btn btn-success" onClick={this.approve}>
+                                        <i className='la la-check-circle'></i>
+                                        Approve
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -158,6 +158,7 @@ export default class App extends Component {
         <Route path = '/home' component = {Home} />
         <Route path = '/order' component = {Order} />
         <Route path = '/purchases' component = {Purchases} />
+        <Route render={ () => <Redirect to={{pathname: '/'}} /> }/>
       </Router>
     )
   }
