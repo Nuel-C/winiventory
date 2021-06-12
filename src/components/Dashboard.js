@@ -342,8 +342,19 @@ export default class Dashboard extends Component {
                           </div>
                       </div>
                     </div>
+
+                    {
+                        this.state.purchases.length == 0 ? <div></div> :
+                            <div className='container mt-3'>
+                                <p className='bg-info w-50 ml-auto mr-auto text-light text-center py-1' style={{
+                                    borderRadius: '20px'
+                                }}>Approvals</p>
+                            </div>
+                    }
                     
-                    <div className='container'>
+                    
+
+                    <div className='container mt-5'>
                         <div className='row'>
                             {
                                 this.state.purchases.map((purchase) => (

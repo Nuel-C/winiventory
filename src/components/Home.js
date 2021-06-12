@@ -160,6 +160,7 @@ export default class Home extends Component {
                                     <h5 className='text-success' style={{ fontFamily: 'cursive' }}>Items:</h5>
                                     {
                                         this.state.inventories.map((inventory) => (
+                                            inventory.units == 0 ? '' :
                                             <ul className="list-group" style={{ fontFamily: 'cursive' }}>
                                                 {inventory.companyName == user.companyname ? <li className="list-group-item list-group-item-action">{inventory.itemName}</li> : null}
                                             </ul>

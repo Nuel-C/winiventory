@@ -308,7 +308,10 @@ export default class Inventory extends Component {
                                         <tr key={dat._id}>
                                             <td>{dat.itemName}</td>
                                             <td>{dat.unitPrice}</td>
-                                            <td>{dat.units}</td>
+                                            <td className={dat.units == 0 ? 'text-danger' : 'text-success'}>
+                                                {dat.units}
+                                                {/* {dat.units == 0 ? 0 : dat.units} */}
+                                            </td>
                                             <td className='hide'>{dat.description}</td>
                                             <td className='hide'>{dat.date}</td>
                                             <td><button onClick={this.edit} className='btn btn-success btn-block' id='button'><img src={Pen} alt='' style={{height:'1rem'}}/></button></td>
@@ -324,6 +327,7 @@ export default class Inventory extends Component {
                 {
                     this.state.logout === true ? <Redirect to='/'/> : null
                 }
+
             </div>
         )
     }

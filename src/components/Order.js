@@ -10,7 +10,8 @@ export class Order extends Component {
         id: this.props.location.state.id,
         items: [],
         type: this.props.location.state.type,
-        currentItem: {}
+        currentItem: {},
+        unitMessage: ''
     }
 
     componentDidMount() {
@@ -45,45 +46,69 @@ export class Order extends Component {
         let purchaseForm = document.getElementById("purchaseForm")
         let formData = new FormData(purchaseForm)
         let body = this.state.currentItem
+        
+        //Delete the fields not needed
         delete body._id
         delete body.date
+
         body['customerName'] = this.state.companyname
         body['status'] = 'Not yet approved'
         for (let key of formData.keys()) {
-            body[key] = formData.get(key)
+            body['Units'] = formData.get(key)
         }
-        fetch('/add_purchase', {
+
+        console.log(this.state.currentItem)
+
+        console.log('bodyUnits', body.Units)
+        console.log('currentItemUnits', this.state.currentItem.units)
+        //check if the units entered exceeds the current units available
+        if (body.Units > this.state.currentItem.units) {
+            this.setState({
+                unitMessage: 'Cannot exceed available units!'
+            })
+            setTimeout(() => {
+                this.setState({
+                    unitMessage: ''
+                })
+            }, 5000)
+        } else {
+            body.units = body.Units
+            delete body.Units
+            fetch('/add_purchase', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-type': 'application/json'
             },
             body: JSON.stringify(body)
-        })
-        .then((res) => {
-            return res.json()
-        })
-        .then((data) => {
-            if (data.message == 'Success!') {
-                this.setState({message: data.message})
-                setTimeout(() => {
-                    this.setState({
-                        message: ''
-                    })
-                }, 5000)
-                
-            } else {
-                this.setState({message: data.message})
-                setTimeout(() => {
-                    this.setState({
-                        message: ''
-                    })
-                }, 5000)
-            }
-        })
-        .catch(() => {
-            console.log('Oops, an error occured!')
-        })
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((data) => {
+                if (data.message == 'Success!') {
+                    this.setState({message: data.message})
+                    setTimeout(() => {
+                        this.setState({
+                            message: ''
+                        })
+                    }, 5000)
+                    
+                } else {
+                    this.setState({message: data.message})
+                    setTimeout(() => {
+                        this.setState({
+                            message: ''
+                        })
+                    }, 5000)
+                }
+            })
+            .catch(() => {
+                console.log('Oops, an error occured!')
+            })
+        }
+
+        
     }
 
     render() {
@@ -134,53 +159,57 @@ export class Order extends Component {
                         <h5>
                             <i className='la la-check-circle'></i>
                             {' '}
-                            {this.state.seller}
+                            { this.state.seller }
                         </h5>
                     </p>
                     <div className='row'>
                         {
                             this.state.items.map((item) => (
-                                <div className='col-sm-4 mb-4'>
-                                    <div className='card' style={{ boxShadow: '0px 10px 15px darkgrey' }}>
-                                        <div className='card-body'>
-                                            <h5 className='text-success' style={{ fontFamily: 'cursive' }}>{item.itemName}</h5>
-                                            <hr />
-                                            <div className='row' style={{ fontFamily: 'cursive' }}>
-                                                <div className='col-sm-6'>
-                                                    <p>Unit Price:</p>
+                                
+                                item.units == 0 ? '' :
+                                    <div className='col-sm-4 mb-4'>
+                                        <div className='card' style={{ boxShadow: '0px 10px 15px darkgrey' }}>
+                                            <div className='card-body'>
+                                                <h5 className='text-success' style={{ fontFamily: 'cursive' }}>{item.itemName}</h5>
+                                                <hr />
+                                                <div className='row' style={{ fontFamily: 'cursive' }}>
+                                                    <div className='col-sm-6'>
+                                                        <p>Unit Price:</p>
+                                                    </div>
+                                                    <div className='col-sm-6'>
+                                                        <p className='text-info'>{ 'N' + item.unitPrice }</p>
+                                                    </div>
                                                 </div>
-                                                <div className='col-sm-6'>
-                                                    <p className='text-info'>{ 'N' + item.unitPrice }</p>
+                                                <div className='row' style={{ fontFamily: 'cursive' }}>
+                                                    <div className='col-sm-6'>
+                                                        <p>Units:</p>
+                                                    </div>
+                                                    <div className='col-sm-6'>
+                                                        <p className='text-info'>{ item.units }</p>
+                                                    </div>
+                                                </div>
+                                                <div className='row' style={{ fontFamily: 'cursive' }}>
+                                                    <div className='col-sm-6'>
+                                                        <p>Description:</p>
+                                                    </div>
+                                                    <div className='col-sm-6'>
+                                                        <p className='text-info'>{ item.description }</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className='row' style={{ fontFamily: 'cursive' }}>
-                                                <div className='col-sm-6'>
-                                                    <p>Units:</p>
-                                                </div>
-                                                <div className='col-sm-6'>
-                                                    <p className='text-info'>{ item.units }</p>
-                                                </div>
-                                            </div>
-                                            <div className='row' style={{ fontFamily: 'cursive' }}>
-                                                <div className='col-sm-6'>
-                                                    <p>Description:</p>
-                                                </div>
-                                                <div className='col-sm-6'>
-                                                    <p className='text-info'>{ item.description }</p>
-                                                </div>
-                                            </div>
+                                            <button className='btn btn-default mb-5 mx-5 purchase' data-toggle="modal" data-target="#purchaseModal" style={{
+                                                borderRadius: 20,
+                                                fontFamily: 'cursive',
+                                                boxShadow: '0px 5px 10px darkgrey'
+                                            }} onClick={ () =>this.purchase(this, item) } id='purchaseBtn'>
+                                                <i className='la la-shopping-cart'></i>
+                                                {' '}
+                                                Purchase
+                                            </button>
                                         </div>
-                                        <button className='btn btn-default mb-5 mx-5 purchase' data-toggle="modal" data-target="#purchaseModal" style={{
-                                            borderRadius: 20,
-                                            fontFamily: 'cursive',
-                                            boxShadow: '0px 5px 10px darkgrey'
-                                        }} onClick={ () =>this.purchase(this, item) }>
-                                            <i className='la la-shopping-cart'></i>
-                                            {' '}
-                                            Purchase
-                                        </button>
                                     </div>
-                                </div>
+                                
+                                
                             ))
                         }
                     </div>
@@ -198,6 +227,7 @@ export class Order extends Component {
                             </div>
                             <div class="modal-body">
                                 <form className='mt-3' id='purchaseForm'>
+                                    <span className='text-info'>{this.state.unitMessage}</span>
                                     <span style={{color:'green'}}>{this.state.message}</span>
                                     <span style={{color:'red'}}>{this.state.error}</span>
                                     <div className='form-group'>
