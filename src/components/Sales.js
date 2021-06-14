@@ -15,6 +15,36 @@ export default class Sales extends Component {
         this.logout = this.logout.bind(this)
     }
 
+    componentDidMount() {
+        fetch(`/list_sales/${this.state.companyname}`)
+        .then((res) => {
+            return res.json()
+        })
+        .then((data) => {
+            let salesTable = document.getElementById('salesTable')
+            let content = ''
+            let reverse = []
+            data.sales.map((sale) => {
+                 reverse.push(sale)
+            })
+            reverse.reverse()
+            reverse.map((sale) => {
+                 content = `<tr>
+                                <td>${ sale.item }</td>
+                                <td>${ sale.customer }</td>
+                                <td>${ sale.phone }</td>
+                                <td>${ sale.units }</td>
+                                <td>${ sale.discount }</td>
+                                <td>${ new Date(sale.date).toISOString().substr(0, 10) }</td>
+                            </tr>`
+                salesTable.innerHTML += content
+            })
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
     logout(){
         var url = '/logout'
         axios.get(url)
@@ -26,7 +56,7 @@ export default class Sales extends Component {
         return (
             <div>
                 <nav className="navbar navbar-expand-md navbar-light bg-light" style={{textAlign:'center'}}>
-                <a className="navbar-brand" href='/'>Winnieventory</a>
+                <a className="navbar-brand" href='/'>Winventory</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -64,7 +94,23 @@ export default class Sales extends Component {
                     </ul>
 
                 </div>
-            </nav>
+             </nav>
+                <div className="table-responsive container mt-5">
+                    <table className="table table-hover" style={{ whiteSpace: 'nowrap' }}>
+                        <thead className="thead thead-dark">
+                            <tr>
+                                <th>Item</th>
+                                <th>Customer</th>
+                                <th>Phone Number</th>
+                                <th>Units</th>
+                                <th>Discount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTable">
+                        </tbody>
+                    </table>
+                </div>
             {
                this.state.logout === true ? <Redirect to='/'/> : null
             }

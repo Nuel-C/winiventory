@@ -15,11 +15,11 @@ export default class Inventory extends Component {
             name:'',
             unitprice:'',
             units:'',
-            description:'',
+            description: '',
             message:'',
             error:'',
             items:[],
-            logout:''
+            logout: '',
         }
         this.onChange = this.onChange.bind(this)
         this.submit = this.submit.bind(this)
@@ -32,12 +32,62 @@ export default class Inventory extends Component {
         this.setState({[e.target.name]: e.target.value})
     }
 
-    edit(){
-
+    edit(e) {
+        if (e.target.id == 'button') {
+            document.getElementById('edit').textContent = 'Edit'
+            let children = e.target.parentElement.parentElement.children
+            console.log(children)
+            document.getElementById('prevName').textContent = children[0].textContent
+            this.setState({
+                name: children[0].textContent,
+                unitprice: children[1].textContent,
+                units: children[2].textContent,
+                description: children[3].textContent
+            })
+        }
+        
     }
 
-    delete(){
-        
+    delete(e){
+        if (e.target.id == 'delBtn') {
+            let children = e.target.parentElement.parentElement.children
+            let id = children[0].textContent
+            fetch(`/delete_inventory/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({companyname: this.state.companyname})
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((data) => {
+                console.log(data)
+            })
+            .catch(err => console.log(err))
+            this.setState({
+                items: this.state.items.filter(item => {
+                   return item.itemName !== id
+                })
+            })
+        }
+        if (e.target.id == 'delImg') {
+            let children = e.target.parentElement.parentElement.parentElement.children
+            let id = children[0].textContent
+            console.log(id)
+            fetch(`/delete_inventory/${ id }`, {
+                method: 'DELETE',
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((data) => {
+                console.log(data)
+            })
+            .catch(err => console.log(err))
+        }
     }
 
     componentDidMount(){
@@ -73,28 +123,46 @@ export default class Inventory extends Component {
         this.setState({message: '*Adding Item*', error:''})
         var post = {
             companyname: this.state.companyname,
-            item: this.state.name,
+            itemName: this.state.name,
             units: this.state.units,
             description: this.state.description,
-            unitprice: this.state.unitprice,
+            unitPrice: this.state.unitprice,
             id: this.state.id
 
         }
-        axios.post('/addinventory', post)
-        .then((res) => {
-            console.log(res.data)
-            if(res.data.success === true){
-                this.setState({item:'', units:'', description:'', unitprice:'', message: res.data.message, error:''})
-            }else{
-                this.setState({item:'', units:'', description:'', unitprice:'', error: res.data.message, message:'',})
-            }
-        })
+        if (document.getElementById('edit').textContent == 'Edit') {
+            let itemName = document.getElementById('prevName').textContent
+            fetch(`/edit_inventory/${itemName}/edit`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(post)
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((data) => {
+                console.log(data)
+            })
+        } else {
+            axios.post('/addinventory', post)
+                .then((res) => {
+                    console.log(res.data)
+                    if(res.data.success === true){
+                        this.setState({item:'', units:'', description:'', unitprice:'', message: res.data.message, error:''})
+                    }else{
+                        this.setState({item:'', units:'', description:'', unitprice:'', error: res.data.message, message:'',})
+                    }
+                })
+        }
 
         this.setState({
             name:'',
             unitprice:'',
             units:'',
-            description:'',
+            description: ''
         })
 
         var post2 = {
@@ -114,6 +182,7 @@ export default class Inventory extends Component {
                 error:'',
             })
         }, 5000)
+        document.getElementById('edit').textContent = ''
     }
 
     logout(){
@@ -127,7 +196,7 @@ export default class Inventory extends Component {
         return (
             <div>
                 <nav className="navbar navbar-expand-md navbar-light bg-light" style={{textAlign:'center'}}>
-                <a className="navbar-brand" href='/'>Winnieventory</a>
+                <a className="navbar-brand" href='/'>Winventory</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -171,7 +240,11 @@ export default class Inventory extends Component {
                   <h2 style={{textAlign:'center'}}>Add Inventory</h2><br/>
                   <div className='form-div'>
                     <span style={{color:'green'}}>{this.state.message}</span>
-                    <span style={{color:'red'}}>{this.state.error}</span>
+                    <span style={{ color: 'red' }}>{this.state.error}</span>
+                        
+                      <p style={{ display: 'none', margin: 'none' }} id='edit'></p>
+                      <p style={{ display: 'none', margin: 'none' }} id='prevName'></p>
+
                       <form onSubmit={this.submit}>
                        Item Name:
                       <input required style={{width:'100%', borderRadius:'30px'}} type = 'text'
@@ -214,38 +287,47 @@ export default class Inventory extends Component {
                       </div>
                   </div>
               </div><br/><br/>
-              <h2 style={{textAlign:'center'}}>Manage Inventory</h2><br/>
-              <table id='table' className='container'>
-                    <tbody>
-                    <tr>
-                        <th>Item Name</th>
-                        <th>Unit Price</th>
-                        <th >Units</th>
-                        <th className='hide'>Description</th>
-                        <th className='hide'>Date Added</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
+              <h2 style={{ textAlign: 'center' }}>Manage Inventory</h2><br />
+              <div className='table-responsive'>
+                    <table id='table' className='container table table-hover' style={{ whiteSpace: 'nowrap' }}>
+                        <thead className='thead thead-dark'>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Unit Price</th>
+                                <th >Units</th>
+                                <th className='hide'>Description</th>
+                                <th className='hide'>Date Added</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                this.state.items.map(dat => {
+                                    return(
+                                        <tr key={dat._id}>
+                                            <td>{dat.itemName}</td>
+                                            <td>{dat.unitPrice}</td>
+                                            <td className={dat.units == 0 ? 'text-danger' : 'text-success'}>
+                                                {dat.units}
+                                                {/* {dat.units == 0 ? 0 : dat.units} */}
+                                            </td>
+                                            <td className='hide'>{dat.description}</td>
+                                            <td className='hide'>{dat.date}</td>
+                                            <td><button onClick={this.edit} className='btn btn-success btn-block' id='button'><img src={Pen} alt='' style={{height:'1rem'}}/></button></td>
+                                            <td><button onClick={this.delete} className='btn btn-danger btn-block' id='delBtn'><img src={Trash} alt='' style={{height:'1rem'}} id='delImg'/></button></td>
+                                        </tr> 
+                                    ) 
+                                }).reverse()
+                            }
+                        </tbody>
+                   </table><br/><br/><br/>
+                </div>
+              
                 {
-                    this.state.items.map(dat => {
-                        return(
-                            <tr key={dat._id}>
-                                <td>{dat.itemName}</td>
-                                <td>{dat.unitPrice}</td>
-                                <td>{dat.units}</td>
-                                <td className='hide'>{dat.description}</td>
-                                <td className='hide'>{dat.date}</td>
-                                <td><button onClick={this.edit} className='btn btn-success btn-block'><img src={Pen} alt='' style={{height:'1rem'}}/></button></td>
-                                <td><button onClick={this.delete} className='btn btn-danger btn-block'><img src={Trash} alt='' style={{height:'1rem'}}/></button></td>
-                            </tr> 
-                         ) 
-                    }).reverse()
+                    this.state.logout === true ? <Redirect to='/'/> : null
                 }
-                </tbody>
-                </table><br/><br/><br/>
-                {
-               this.state.logout === true ? <Redirect to='/'/> : null
-                }
+
             </div>
         )
     }
